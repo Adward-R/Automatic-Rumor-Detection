@@ -41,7 +41,11 @@ def main():
             sheet = newWorkbook.add_sheet('tweet')
             for i in range(totalRowNum):
                 for j in range(5):
-                    sheet.write(i,j,label=table.cell(i,j).value)
+                    if (j==1 and i!=0):
+                        lbl = xlrd.xldate_as_tuple(table.cell(i,j).value,0)
+                        sheet.write(i,j,label = str(lbl[2])+' '+str(lbl[3]))
+                    else:
+                        sheet.write(i,j,label=table.cell(i,j).value)
                 if (i>0):
                     sheet.write(i,5,label=level[i-1])
                 else:
