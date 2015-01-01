@@ -5,6 +5,7 @@ import xlrd
 import sys
 import xlwt
 
+#get the spread level of each forward of an original post, and write to a new .xlsx as a filtered version.
 def main():
     path = r'/Users/Adward/Documents/ZJU/SRTP/TestData/'
     for parent, dirs, files in os.walk(path):
