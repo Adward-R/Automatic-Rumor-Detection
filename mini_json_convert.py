@@ -7,7 +7,6 @@ def main():
     path = r'/Users/Adward/Documents/ZJU/SRTP/LevelData/'
     for parent, dirs, files in os.walk(path):
         for f in files:
-            level = []
             s = os.path.join(parent,f)
             if '.DS_Store'==f:
                 continue
@@ -18,9 +17,17 @@ def main():
             table = workbook.sheets()[0]
             colnames =  table.row_values(0)
             fre = []
+            level = []
             totalRowNum = table.nrows
             for rownum in range(1,totalRowNum):
                 fre.append(table.row_values(rownum)[1].split(' '))
+                lev = table.row_values(rownum)[5]
+                if (int(lev)==0 or int(lev)==1):
+                    level.append(0)
+                elif (int(lev)==2):
+                    level.append(1)
+                else:
+                    level.append(2)
 
             _fre = []
             for itm in fre:
@@ -40,22 +47,24 @@ def main():
 
             freq = []
             for i in range(24):
-                freq.append(0)
+                tmp = [0,0,0]
+                freq.append(tmp)
             #normalization
+            tick = 0
             for itm in _fre:
                 itm = ((itm[0]-_fre[lp][0])*24 + (itm[1]-_fre[lp][1]))*1.0/duration*24
-                if itm-24==0.0:
+                if itm - 24==0.0:
                     itm -= 0.1
-                freq[int(itm)-1] += 1
+                freq[int(itm)][level[tick]] += 1
+                tick += 1
 
             fileWriter = open("000.json",'w')
             fileWriter.write('{\n "name": "flare",\n "children": [')
             for i in range(len(freq)):
-                if i==0:
-                    fileWriter.write(str(freq[0]))
-                else:
-                    fileWriter.write(','+str(freq[i]))
-            fileWriter.write(']\n}')
+                if i!=0:
+                    fileWriter.write(',')
+                fileWriter.write('\n  {"total": '+str(freq[i][0]+freq[i][1]+freq[i][2])+', "level0": '+str(freq[i][0])+', "level1": '+str(freq[i][1])+', "level2": '+str(freq[i][2])+'}')
+            fileWriter.write('\n ]\n}')
             fileWriter.close()
             return
                 
