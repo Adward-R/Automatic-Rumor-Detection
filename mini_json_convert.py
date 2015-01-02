@@ -3,8 +3,10 @@ import os.path
 import xlrd
 import sys
 
+#enabled to skip almost empty charts
 def main():
     path = r'/Users/Adward/Documents/ZJU/SRTP/LevelData/'
+    cnt = 0
     for parent, dirs, files in os.walk(path):
         for f in files:
             s = os.path.join(parent,f)
@@ -44,6 +46,8 @@ def main():
             #print str(_fre[hp][0])+' '+str(_fre[hp][1])
             #print str(_fre[lp][0])+' '+str(_fre[lp][1])
             duration = (_fre[hp][0]-_fre[lp][0])*24 + (_fre[hp][1]-_fre[lp][1])
+            if duration==0:
+                continue
 
             freq = []
             for i in range(24):
@@ -58,7 +62,7 @@ def main():
                 freq[int(itm)][level[tick]] += 1
                 tick += 1
 
-            fileWriter = open("000.json",'w')
+            fileWriter = open("./json/"+str(cnt)+".json",'w')
             fileWriter.write('{\n "name": "flare",\n "children": [')
             for i in range(len(freq)):
                 if i!=0:
@@ -66,7 +70,8 @@ def main():
                 fileWriter.write('\n  {"total": '+str(freq[i][0]+freq[i][1]+freq[i][2])+', "level0": '+str(freq[i][0])+', "level1": '+str(freq[i][1])+', "level2": '+str(freq[i][2])+'}')
             fileWriter.write('\n ]\n}')
             fileWriter.close()
-            return
+            print 'Processing file '+str(f)+' finished.'
+            cnt += 1
                 
 if __name__=='__main__':
     main()
