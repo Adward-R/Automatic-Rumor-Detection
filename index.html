@@ -36,7 +36,7 @@
     <link rel="stylesheet" href="http://apps.bdimg.com/libs/jqueryui/1.10.4/css/jquery-ui.min.css">
     <script src="http://apps.bdimg.com/libs/jquery/1.10.2/jquery.min.js"></script>
     <script src="http://apps.bdimg.com/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
-    <script src="/Users/Adward/Desktop/d3.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
 
     <script>
 	 
@@ -113,10 +113,10 @@
                        .attr("width", x.rangeBand())
                        .attr("height", 0);
 
-       rect.transition()
+       /*rect.transition()
            .delay(function(d, i) { return i * 10; })
            .attr("y", function(d) { return y(d.y0 + d.y); })
-           .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); });
+           .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); });*/
 
        svg.append("g")
           .attr("class", "x axis")
@@ -132,7 +132,7 @@
        }, 2000);
 
        function change() {
-         clearTimeout(timeout);
+         //clearTimeout(timeout);
          if (this.value === "grouped") transitionGrouped();
          else transitionStacked();
        }
@@ -175,21 +175,26 @@
          else {return a.map(function(d, i) { return {x: i, y: node["children"][num]["children"][i]["level2"]}; });}
        }
        
-       //d3.select(this).remove();
        $(function() {
 		 var select = d3.selectAll("svg");
 		 var slider = $( "<div id='slider'></div>" ).insertAfter( select ).slider({
     	   //$( "#slider" ).slider({
 	       orientation:"horizontal",
-	       max:9,
-	       value:4,
+	       max:99,
+	       value:44,
 	       slide: function(event,ui){
 		     num = ui.value;
 		     layers = stack(d3.range(n).map(function(idx) { return bumpLayer(idx, m, .1); }));
 		     yGroupMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.y; }); });
 			 yStackMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.y0 + d.y; }); });
              
-			 
+			 var x = d3.scale.ordinal()
+    	               .domain(d3.range(m))
+		               .rangeRoundBands([0, width], .08);
+
+			var y = d3.scale.linear()
+		               .domain([0, yStackMax])
+		               .range([height, 0]);
 
              svg = d3.select("svg")
                      .attr("width", width + margin.left + margin.right)
@@ -207,6 +212,8 @@
                             .enter().append("g")
                             .attr("class", "layer")
                             .style("fill", function(d, i) { return color(i); });
+
+//d3.select(("input[value=\"stacked\"]").property("checked",true));
 
              var rect = layer.selectAll("rect")
                              .data(function(d) { return d; })
@@ -228,9 +235,50 @@
                 .call(xAxis);
 
              rect.transition()
-                 .delay(function(d, i) { return i * 10; })
+                 .delay(function(d, i) { return i ; })
                  .attr("y", function(d) { return y(d.y0 + d.y); })
-                 .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); });
+                 .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); });  
+                 
+                 d3.selectAll("input").on("change", change);
+       
+       //d3.selectAll($("#slide")).on("slide",function() {console.log("HI")} );
+
+       var timeout = setTimeout(function() {
+         d3.select("input[value=\"grouped\"]").property("checked", true).each(change);
+       }, 2000);
+
+       function change() {
+         //clearTimeout(timeout);
+         if (this.value === "grouped") transitionGrouped();
+         else transitionStacked();
+       }
+
+       function transitionGrouped() {
+         y.domain([0, yGroupMax]);
+
+         rect.transition()
+             .duration(500)
+             .delay(function(d, i) { return i * 10; })
+             .attr("x", function(d, i, j) { return x(d.x) + x.rangeBand() / n * j; })
+             .attr("width", x.rangeBand() / n)
+             .transition()
+             .attr("y", function(d) { return y(d.y); })
+             .attr("height", function(d) { return height - y(d.y); });
+       }
+
+       function transitionStacked() {
+         y.domain([0, yStackMax]);
+
+         rect.transition()
+             .duration(500)
+             .delay(function(d, i) { return i * 10; })
+             .attr("y", function(d) { return y(d.y0 + d.y); })
+             .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); })
+             .transition()
+             .attr("x", function(d) { return x(d.x); })
+             .attr("width", x.rangeBand());
+       }
+
     	     
 		   }
     	 });
