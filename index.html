@@ -1,169 +1,250 @@
 <!DOCTYPE html>
-<meta charset="utf-8">
-<style>
+<html>
+  <meta charset="utf-8">
+  <style>
 
- body {
-   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-   margin: auto;
-   position: relative;
-   width: 960px;
- }
-
- text {
-   font: 10px sans-serif;
- }
-
- .axis path,
- .axis line {
-   fill: none;
-   stroke: #000;
-   shape-rendering: crispEdges;
- }
-
- form {
-   position: absolute;
-   right: 10px;
-   top: 10px;
- }
-
-</style>
-<form>
-  <label><input type="radio" name="mode" value="grouped"> Grouped</label>
-  <label><input type="radio" name="mode" value="stacked" checked> Stacked</label>
-</form>
-<script src="file:///Users/Adward/Desktop/d3.js"></script>
-<script>
- 
- var margin = {top: 40, right: 10, bottom: 20, left: 10},
- width = 960 - margin.left - margin.right,
- height = 500 - margin.top - margin.bottom;
- 
- var node,
- 	n = 3, // number of layers
- 	m = 24, // number of samples per layer
- 	yGroupMax,
- 	yStackMax,
- 	stack,
- 	layers;
- 
- d3.json("./json/0.json",function(error,root){
-   node = root;
-   stack = d3.layout.stack();
-   layers = stack(d3.range(n).map(function(idx) { return bumpLayer(idx, m, .1); }));
-   console.log(layers);
-   yGroupMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.y; }); });
-   yStackMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.y0 + d.y; }); });
-   
-
-   var x = d3.scale.ordinal()
-    	           .domain(d3.range(m))
-		           .rangeRoundBands([0, width], .08);
-
-   var y = d3.scale.linear()
-		           .domain([0, yStackMax])
-		           .range([height, 0]);
-
-   var color = d3.scale.linear()
-    	               .domain([0, n - 1])
-		               .range(["#aad", "#556"]);
-
-   var xAxis = d3.svg.axis()
-		             .scale(x)
-		             .tickSize(0)
-		             .tickPadding(6)
-		             .orient("bottom");
-
-   var svg = d3.select("body").append("svg")
-               .attr("width", width + margin.left + margin.right)
-               .attr("height", height + margin.top + margin.bottom)
-               .append("g")
-               .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-   var layer = svg.selectAll(".layer")
-                  .data(layers)
-                  .enter().append("g")
-                  .attr("class", "layer")
-                  .style("fill", function(d, i) { return color(i); });
-
-   var rect = layer.selectAll("rect")
-                   .data(function(d) { return d; })
-                   .enter().append("rect")
-                   .attr("x", function(d) { return x(d.x); })
-                   .attr("y", height)
-                   .attr("width", x.rangeBand())
-                   .attr("height", 0);
-
-   rect.transition()
-       .delay(function(d, i) { return i * 10; })
-       .attr("y", function(d) { return y(d.y0 + d.y); })
-       .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); });
-
-   svg.append("g")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0," + height + ")")
-      .call(xAxis);
-
-   d3.selectAll("input").on("change", change);
-
-   var timeout = setTimeout(function() {
-     d3.select("input[value=\"grouped\"]").property("checked", true).each(change);
-   }, 2000);
-
-   function change() {
-     clearTimeout(timeout);
-     if (this.value === "grouped") transitionGrouped();
-     else transitionStacked();
+   body {
+     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+     margin: auto;
+     position: relative;
+     width: 960px;
    }
 
-   function transitionGrouped() {
-     y.domain([0, yGroupMax]);
-
-     rect.transition()
-         .duration(500)
-         .delay(function(d, i) { return i * 10; })
-         .attr("x", function(d, i, j) { return x(d.x) + x.rangeBand() / n * j; })
-         .attr("width", x.rangeBand() / n)
-         .transition()
-         .attr("y", function(d) { return y(d.y); })
-         .attr("height", function(d) { return height - y(d.y); });
+   text {
+     font: 10px sans-serif;
    }
 
-   function transitionStacked() {
-     y.domain([0, yStackMax]);
-
-     rect.transition()
-         .duration(500)
-         .delay(function(d, i) { return i * 10; })
-         .attr("y", function(d) { return y(d.y0 + d.y); })
-         .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); })
-         .transition()
-         .attr("x", function(d) { return x(d.x); })
-         .attr("width", x.rangeBand());
+   .axis path,
+   .axis line {
+     fill: none;
+     stroke: #000;
+     shape-rendering: crispEdges;
    }
 
-   // Inspired by Lee Byron's test data generator.
-   function bumpLayer(idx, n, o) {
+   form {
+     position: absolute;
+     right: 10px;
+     top: 10px;
+   }
 
-     function bump(a) {
-       var x = 1 / (.1 + Math.random()),
-       y = 2 * Math.random() - .5,
-       z = 10 / (.1 + Math.random());
-       for (var i = 0; i < n; i++) {
-         var w = (i / n - y) * z;
-         a[i] += x * Math.exp(-w * w);
-       }
-     }
+  </style>
+  <form>
+    <label><input type="radio" name="mode" value="grouped"> Grouped</label>
+    <label><input type="radio" name="mode" value="stacked" checked> Stacked</label>
+  </form>
+  <head>
+    <link rel="stylesheet" href="http://apps.bdimg.com/libs/jqueryui/1.10.4/css/jquery-ui.min.css">
+    <script src="http://apps.bdimg.com/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="http://apps.bdimg.com/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+    <script src="/Users/Adward/Desktop/d3.js"></script>
+
+    <script>
+	 
      
-     var a = [], i;
-     for (i = 0; i < n; ++i) a[i] = node["children"][i]["total"];
-     //for (i = 0; i < 5; ++i) bump(a);
-     if (idx==0){return a.map(function(d, i) { return {x: i, y: node["children"][i]["level0"]}; });}
-     else if (idx==1){return a.map(function(d, i) { return {x: i, y: node["children"][i]["level1"]}; });}
-     else {return a.map(function(d, i) { return {x: i, y: node["children"][i]["level2"]}; });}
-   }
- });
-</script>
+     var margin = {top: 40, right: 10, bottom: 20, left: 10},
+     width = 960 - margin.left - margin.right,
+     height = 500 - margin.top - margin.bottom;
+     
+     var node,
+ 	 n = 3, // number of layers
+ 	 m = 24, // number of samples per layer
+ 	 yGroupMax,
+ 	 yStackMax,
+ 	 stack,
+ 	 layers,
+ 	 num = 4;
+	 
+     
+     
+     
+     d3.json("weibo1.json",function(error,root){
+	   
+	   
+
+       /*function changeSource(){
+	   num = $("#slider").slider("value");
+       }*/
+	   
+       node = root;
+       stack = d3.layout.stack();
+       layers = stack(d3.range(n).map(function(idx) { return bumpLayer(idx, m, .1); }));
+       yGroupMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.y; }); });
+       yStackMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.y0 + d.y; }); });
+       
+
+       var x = d3.scale.ordinal()
+    	               .domain(d3.range(m))
+		               .rangeRoundBands([0, width], .08);
+
+       var y = d3.scale.linear()
+		               .domain([0, yStackMax])
+		               .range([height, 0]);
+
+       var color = d3.scale.linear()
+    	                   .domain([0, n - 1])
+		                   .range(["#aad", "#556"]);
+
+       var xAxis = d3.svg.axis()
+		                 .scale(x)
+		                 .tickSize(0)
+		                 .tickPadding(6)
+		                 .orient("bottom");
+
+       var svg = d3.select("body").append("svg")
+                   .attr("width", width + margin.left + margin.right)
+                   .attr("height", height + margin.top + margin.bottom)
+                   .append("g")
+                   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+       //.on("mouseover",function(){num=num+1; console.log(num);});
+
+       var layer = svg.selectAll(".layer")
+                      .data(layers)
+                      .enter().append("g")
+                      .attr("class", "layer")
+                      .style("fill", function(d, i) { return color(i); });
+       
 
 
+       var rect = layer.selectAll("rect")
+                       .data(function(d) { return d; })
+                       .enter().append("rect")
+                       .attr("x", function(d) { return x(d.x); })
+                       .attr("y", height)
+                       .attr("width", x.rangeBand())
+                       .attr("height", 0);
+
+       rect.transition()
+           .delay(function(d, i) { return i * 10; })
+           .attr("y", function(d) { return y(d.y0 + d.y); })
+           .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); });
+
+       svg.append("g")
+          .attr("class", "x axis")
+          .attr("transform", "translate(0," + height + ")")
+          .call(xAxis);
+
+       d3.selectAll("input").on("change", change);
+       
+       //d3.selectAll($("#slide")).on("slide",function() {console.log("HI")} );
+
+       var timeout = setTimeout(function() {
+         d3.select("input[value=\"grouped\"]").property("checked", true).each(change);
+       }, 2000);
+
+       function change() {
+         clearTimeout(timeout);
+         if (this.value === "grouped") transitionGrouped();
+         else transitionStacked();
+       }
+
+       function transitionGrouped() {
+         y.domain([0, yGroupMax]);
+
+         rect.transition()
+             .duration(500)
+             .delay(function(d, i) { return i * 10; })
+             .attr("x", function(d, i, j) { return x(d.x) + x.rangeBand() / n * j; })
+             .attr("width", x.rangeBand() / n)
+             .transition()
+             .attr("y", function(d) { return y(d.y); })
+             .attr("height", function(d) { return height - y(d.y); });
+       }
+
+       function transitionStacked() {
+         y.domain([0, yStackMax]);
+
+         rect.transition()
+             .duration(500)
+             .delay(function(d, i) { return i * 10; })
+             .attr("y", function(d) { return y(d.y0 + d.y); })
+             .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); })
+             .transition()
+             .attr("x", function(d) { return x(d.x); })
+             .attr("width", x.rangeBand());
+       }
+
+       // Inspired by Lee Byron's test data generator.
+       function bumpLayer(idx, n, o) {
+         
+         var a = [], i;
+         for (i = 0; i < n; ++i) a[i] = i;
+         //for (i = 0; i < 5; ++i) bump(a);
+         //console.log($("#slider").slider("value"));
+         if (idx==0){return a.map(function(d, i) { return {x: i, y: node["children"][num]["children"][i]["level0"]}; });}
+         else if (idx==1){return a.map(function(d, i) { return {x: i, y: node["children"][num]["children"][i]["level1"]}; });}
+         else {return a.map(function(d, i) { return {x: i, y: node["children"][num]["children"][i]["level2"]}; });}
+       }
+       
+       //d3.select(this).remove();
+       $(function() {
+		 var select = d3.selectAll("svg");
+		 var slider = $( "<div id='slider'></div>" ).insertAfter( select ).slider({
+    	   //$( "#slider" ).slider({
+	       orientation:"horizontal",
+	       max:9,
+	       value:4,
+	       slide: function(event,ui){
+		     num = ui.value;
+		     layers = stack(d3.range(n).map(function(idx) { return bumpLayer(idx, m, .1); }));
+		     yGroupMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.y; }); });
+			 yStackMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.y0 + d.y; }); });
+             
+			 
+
+             svg = d3.select("svg")
+                     .attr("width", width + margin.left + margin.right)
+                     .attr("height", height + margin.top + margin.bottom)
+                     .append("g")
+                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");         
+             
+	         d3.select("g")
+               .data(0)
+               .exit()
+               .remove();       
+
+             var layer = svg.selectAll(".layer")
+                            .data(layers)
+                            .enter().append("g")
+                            .attr("class", "layer")
+                            .style("fill", function(d, i) { return color(i); });
+
+             var rect = layer.selectAll("rect")
+                             .data(function(d) { return d; })
+                             .enter().append("rect")
+                             .attr("x", function(d) { return x(d.x); })
+                             .attr("y", height)
+                             .attr("width", x.rangeBand())
+                             .attr("height", 0);
+
+             var xAxis = d3.svg.axis()
+		                       .scale(x)
+		                       .tickSize(0)
+		                       .tickPadding(6)
+		                       .orient("bottom");
+		     
+		     svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+                .call(xAxis);
+
+             rect.transition()
+                 .delay(function(d, i) { return i * 10; })
+                 .attr("y", function(d) { return y(d.y0 + d.y); })
+                 .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); });
+    	     
+		   }
+    	 });
+  	   });
+  	   
+     });
+
+
+    </script>
+  </head>
+  <body>
+	<div id="slider"></div>
+  </body>
+
+</html>
 
 
