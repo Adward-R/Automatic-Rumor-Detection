@@ -47,8 +47,18 @@ def main():
                 for j in range(i+1,len(nodes)):
                     link[nodes[i]][nodes[j]] += 1
 
-            
-                
+    #link_value = []
+    #for i in range(nodeNum):
+    #    for j in range(nodeNum):
+    #        if link[i][j]>0 :
+    #            if link[i][j] not in link_value:
+    #                link_value.append(link[i][j])
+    #link_value.sort()
+    #link_value_len = len(link_value)
+    #for i in range(nodeNum):
+    #    for j in range(nodeNum):
+    #        if link[i][j]>0 :
+    #            link[i][j] = link_value[link_value_len-1-link_value.index(link[i][j])]
 
     f = open("_users.json",'w')
     f.write('{\n "nodes": [')
@@ -65,7 +75,8 @@ def main():
             if link[i][j]>0 :
                 if cnt!=0:
                     f.write(',')
-                f.write('\n  {"source": '+str(i)+',"target": '+str(j)+',"value": '+str(link[i][j])+'}')
+                #convert [9,100] to [1,20]
+                f.write('\n  {"source": '+str(i)+',"target": '+str(j)+',"value": '+str(int((link[i][j]-9)*1.0/91*19+1.0))+'}')
                 cnt += 1
     f.write('\n ]\n}')
     f.close()
