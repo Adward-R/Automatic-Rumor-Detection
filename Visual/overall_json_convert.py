@@ -7,7 +7,7 @@ import sys
 def main():
     path = r'/Users/Adward/Documents/ZJU/SRTP/LevelData/'
     cnt = 0
-    fileWriter = open("weibo1.json",'w')
+    fileWriter = open("weibo.json",'w')
     fileWriter.write('{\n "name": "weibo",\n "children": [')
     for parent, dirs, files in os.walk(path):
         for f in files:
@@ -70,11 +70,11 @@ def main():
             for i in range(len(freq)):
                 if i!=0:
                     fileWriter.write(',')
-                fileWriter.write('\n    {"total": '+str(freq[i][0]+freq[i][1]+freq[i][2])+', "level0": '+str(freq[i][0])+', "level1": '+str(freq[i][1])+', "level2": '+str(freq[i][2])+'}')
+                fileWriter.write('\n    {"level0": '+str(freq[i][0])+', "level1": '+str(freq[i][1])+', "level2": '+str(freq[i][2])+'}')
             fileWriter.write('\n   ]\n  }')
             print 'Processing file '+str(f)+' finished.'
             cnt += 1
-            if cnt==100:
+            if cnt==400:
                 break
         fileWriter.write('\n ]\n}')
         fileWriter.close()

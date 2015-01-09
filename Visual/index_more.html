@@ -52,6 +52,13 @@
 	 width: 100%;
 	 height: 100%;
    }
+   #slider {
+    float: left;
+    clear: left;
+    width: 300px;
+    margin: 15px;
+  }
+   
   </style>
   <form>
     <label><input type="radio" name="mode" value="grouped"> Grouped</label>
@@ -72,8 +79,8 @@
      ////////////////////
 
      var margin = {top: 40, right: 10, bottom: 20, left: 10},
-     width = 960 - margin.left - margin.right,
-     height = 500 - margin.top - margin.bottom;
+     width = 480 - margin.left - margin.right,
+     height = 250 - margin.top - margin.bottom;
 
      var n = 3, // number of layers
  	 m = 24, // number of samples per layer
@@ -85,7 +92,7 @@
  	 
  	 var inspect;
  	 
- 	 d3.json("weibo1.json",function(error,root){
+ 	 d3.json("weibo.json",function(error,root){
 
        stack = d3.layout.stack();
        layers = stack(d3.range(n).map(function(idx) { return bumpLayer(idx, m, .1); }));
@@ -116,7 +123,6 @@
                    .append("g")
                    .attr("id","haha")
                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-       //.on("mouseover",function(){num=num+1; console.log(num);});
 
        var layer = svg.selectAll(".layer")
                       .data(layers)
@@ -183,13 +189,10 @@
              .attr("width", x.rangeBand());
        }
 
-       // Inspired by Lee Byron's test data generator.
        function bumpLayer(idx, n, o) {
          
          var a = [], i;
          for (i = 0; i < n; ++i) a[i] = i;
-         //for (i = 0; i < 5; ++i) bump(a);
-         //console.log($("#slider").slider("value"));
          if (idx==0){return a.map(function(d, i) { return {x: i, y: root["children"][num]["children"][i]["level0"]}; });}
          else if (idx==1){return a.map(function(d, i) { return {x: i, y: root["children"][num]["children"][i]["level1"]}; });}
          else {return a.map(function(d, i) { return {x: i, y: root["children"][num]["children"][i]["level2"]}; });}
@@ -197,11 +200,12 @@
        
        $(function() {
 		 var select = d3.select("svg");
+		 //var select = d3.select("#piechart");
 		 var slider = $( "<div id='slider'></div>" ).insertAfter( select ).slider({
     	   //$( "#slider" ).slider({
 	       orientation:"horizontal",
-	       max:99,
-	       value:44,
+	       max:399,
+	       value:199,
 	       slide: function(event,ui){
 		     //inspect();
 		     num = ui.value;
@@ -261,8 +265,6 @@
                  .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); });  
              
              d3.selectAll("input").on("change", change);
-             
-             //d3.selectAll($("#slide")).on("slide",function() {console.log("HI")} );
 
              var timeout = setTimeout(function() {
                d3.select("input[value=\"grouped\"]").property("checked", true).each(change);
@@ -299,7 +301,7 @@
                    .attr("x", function(d) { return x(d.x); })
                    .attr("width", x.rangeBand());
              }
-		     inspect(); 
+		     inspect(num); 
 		   }
     	 });
   	   });    
@@ -307,7 +309,9 @@
 
   	   
        
-       d3.json("users.json",function(error,root){
+       d3.json("donut.json",function(error,root){
+	     
+	     //node = [root["Verified-Male"],root["Verified-Female"],root["Unverified-Male"],root["Unverified-Female"]];
 	     
 	     var svg = d3.select("body")
 	                 .append("svg")
@@ -322,7 +326,7 @@
          svg.append("g")
 	        .attr("class", "lines");
 
-         var width = 960,
+         var width = 480,
          height = 150,
 	     radius = Math.min(width, height) / 2;
 
@@ -344,13 +348,9 @@
 
          var key = function(d){ return d.data.label; };
 
-         var color = d3.scale.ordinal()
-	                         .domain(["Lorem ipsum", "dolor sit", "amet", "consectetur", "adipisicing", "elit", "sed", "do", "eiusmod", "tempor", "incididunt"])
-	                         .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+         
 
-
-
-         inspect = function change() {
+         inspect = function change(num) {
 	       
 	       svg = d3.select("body").select("#piechart");
 		   
@@ -363,7 +363,7 @@
            svg.append("g")
 	          .attr("class", "lines");
 
-           var width = 960,
+           var width = 480,
            height = 150,
 	       radius = Math.min(width, height) / 2;
 
@@ -386,14 +386,13 @@
            var key = function(d){ return d.data.label; };
 
            var color = d3.scale.ordinal()
-	                           .domain(["Lorem ipsum", "dolor sit", "amet", "consectetur", "adipisicing", "elit", "sed", "do", "eiusmod", "tempor", "incididunt"])
-	                           .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+	                           .domain(["Verified-Male", "Verified-Female", "Unverified-Male", "Unverified-Female"])
+	                           .range(["#98abc5","#6b486b", "#a05d56", "#ff8c00"]);
 	       ////////////////////
 	       
-	       var data = color.domain().map(function(label){
-		     return { label: label, value: Math.random() }
+	       var data = color.domain().map(function(label,i){
+		     return { label: label, value: root[num][i] }
 	       });
-
 
 	       /* ------- PIE SLICES -------*/
 	       var slice = svg.select(".slices").selectAll("path.slice")
@@ -405,7 +404,7 @@
 		        .attr("class", "slice");
 
 	       slice		
-		        .transition().duration(1000)
+		        .transition().duration(400)
 		        .attrTween("d", function(d) {
 			 this._current = this._current || d;
 			 var interpolate = d3.interpolate(this._current, d);
@@ -434,7 +433,7 @@
 		     return d.startAngle + (d.endAngle - d.startAngle)/2;
 	       }
 
-	       text.transition().duration(1000)
+	       text.transition().duration(400)
 		       .attrTween("transform", function(d) {
 			 this._current = this._current || d;
 			 var interpolate = d3.interpolate(this._current, d);
@@ -467,7 +466,7 @@
 	       polyline.enter()
 		           .append("polyline");
 
-	       polyline.transition().duration(1000)
+	       polyline.transition().duration(400)
 		           .attrTween("points", function(d){
 			 this._current = this._current || d;
 			 var interpolate = d3.interpolate(this._current, d);
@@ -483,12 +482,12 @@
 	       polyline.exit()
 		           .remove();
          };
-         inspect();
+         inspect(199);
 	 	 //end of pie  
 	 	 
 	 	 d3.json("_users.json", function(error, graph) {
-           var width = 960,
-           height = 500;
+           var width = 480,
+           height = 250;
            
            var fisheye = d3.fisheye.circular()
 	   	                           .radius(50)
@@ -569,7 +568,6 @@
     </script>
   </head>
   <body>
-	<div id="slider"></div>
   </body>
 
 </html>
