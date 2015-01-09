@@ -42,7 +42,7 @@ def main():
             if cnt==400:
                 break
 
-    fileWriter = open("donut.json",'w')
+    fileWriter = open("../data/donut.json",'w')
     fileWriter.write(str(repost_users).replace("'",'"'))
     fileWriter.close()
     return

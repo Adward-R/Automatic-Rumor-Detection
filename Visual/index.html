@@ -47,18 +47,18 @@
 	 stroke-width: 2px;
 	 fill: none;
    }
-   
+
    #donut {
 	 width: 100%;
 	 height: 100%;
    }
    #slider {
-    float: left;
-    clear: left;
-    height: 300px;
-    margin: 15px;
-  }
-   
+     float: left;
+     clear: left;
+     height: 300px;
+     margin: 15px;
+   }
+
   </style>
   <form>
     <label><input type="radio" name="mode" value="grouped"> Grouped</label>
@@ -72,11 +72,6 @@
     <script src="./lib/fisheye.js"></script>
 
     <script>
-	 
-	 
-	 
-
-     ////////////////////
 
      var margin = {top: 40, right: 10, bottom: 20, left: 10},
      width = 500 - margin.left - margin.right,
@@ -89,13 +84,12 @@
  	 stack,
  	 layers,
  	 num = 4;
- 	 
- 	 var inspect;
- 	 
- 	 d3.json("weibo.json",function(error,root){
+ 	 var inspect; //to get the redrawing function of donut chart
+
+ 	 d3.json("data/weibo.json",function(error,root){
 
        stack = d3.layout.stack();
-       layers = stack(d3.range(n).map(function(idx) { return bumpLayer(idx, m, .1); }));
+       layers = stack(d3.range(n).map(function(idx) { return dataAdapter(idx, m, .1); }));
        yGroupMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.y; }); });
        yStackMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.y0 + d.y; }); });
 
@@ -188,15 +182,15 @@
              .attr("width", x.rangeBand());
        }
 
-       function bumpLayer(idx, n, o) {
-         
+       function dataAdapter(idx, n, o) {
          var a = [], i;
          for (i = 0; i < n; ++i) a[i] = i;
          if (idx==0){return a.map(function(d, i) { return {x: i, y: root["children"][num]["children"][i]["level0"]}; });}
          else if (idx==1){return a.map(function(d, i) { return {x: i, y: root["children"][num]["children"][i]["level1"]}; });}
          else {return a.map(function(d, i) { return {x: i, y: root["children"][num]["children"][i]["level2"]}; });}
        }
-       
+
+       //JQuery Slider start
        $(function() {
 		 var select = d3.select("svg");
 		 var slider = $( "<div id='slider'></div>" ).insertAfter( select ).slider({
@@ -207,10 +201,10 @@
 	       slide: function(event,ui){
 		     //inspect();
 		     num = ui.value;
-		     layers = stack(d3.range(n).map(function(idx) { return bumpLayer(idx, m, .1); }));
+		     layers = stack(d3.range(n).map(function(idx) { return dataAdapter(idx, m, .1); }));
 		     yGroupMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.y; }); });
 			 yStackMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.y0 + d.y; }); });
-             
+
 			 var x = d3.scale.ordinal()
     	                     .domain(d3.range(m))
 		                     .rangeRoundBands([0, width], .08);
@@ -218,22 +212,20 @@
 			 var y = d3.scale.linear()
 		                     .domain([0, yStackMax])
 		                     .range([height, 0]);
-		     
-		     
+
 		     //clear the old data in order to prepare to redraw the bar chart
 		     d3.select("svg").selectAll("g")
                .data([])
                .exit()
                .remove();
 
-             svg = d3.select("svg");         
-             
-             
+             svg = d3.select("svg");
+
              layer = svg.selectAll(".layer")
-                            .data(layers)
-                            .enter().append("g")
-//                            .attr("class", "layer")
-                            .style("fill", function(d, i) { return color(i); });
+                        .data(layers)
+                        .enter().append("g")
+             //                            .attr("class", "layer")
+                        .style("fill", function(d, i) { return color(i); });
 
              //d3.select(("input[value=\"stacked\"]").property("checked",true));
 
@@ -260,8 +252,8 @@
              rect.transition()
                  .delay(function(d, i) { return i ; })
                  .attr("y", function(d) { return y(d.y0 + d.y); })
-                 .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); });  
-             
+                 .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); });
+
              d3.selectAll("input").on("change", change);
 
              var timeout = setTimeout(function() {
@@ -299,129 +291,85 @@
                    .attr("x", function(d) { return x(d.x); })
                    .attr("width", x.rangeBand());
              }
-		     inspect(num); 
+		     inspect(num);
 		   }
     	 });
-  	   });    
+  	   });
   	   //end of jquery ui
 
-  	   d3.json("repost_users.json", function(error, graph) {
-           var width = 400,
-           height = 250;
-           
-           var fisheye = d3.fisheye.circular()
-	   	                           .radius(50)
-	   	                           .distortion(1);
-
-           var color = d3.scale.category20();
-
-           var force = d3.layout.force()
-                                .charge(-120)
-                                .linkDistance(30)
-                                .size([width, height]);
-
-           var svg = d3.select("body").append("svg")
-                       .attr("width", width)
-                       .attr("height", height);
-           
-
-           force
-                       .nodes(graph.nodes)
-                       .links(graph.links)
-                       .start();
-
-           var link = svg.selectAll(".link")
-                         .data(graph.links)
-                         .enter().append("line")
-                         .attr("class", "link")
-                         .style("stroke-width", function(d) { return Math.sqrt(d.value); });
-
-           var node = svg.selectAll(".node")
-                         .data(graph.nodes)
-                         .enter().append("circle")
-                         .attr("class", "node")
-                         .attr("r", 5)
-                         .style("fill", function(d) { return color(d.group); })
-                         .call(force.drag);
-
-           node.append("title")
-               .text(function(d) { return d.name; });
-
-           force.on("tick", function() {
-             link.attr("x1", function(d) { return d.source.x; })
-                 .attr("y1", function(d) { return d.source.y; })
-                 .attr("x2", function(d) { return d.target.x; })
-                 .attr("y2", function(d) { return d.target.y; });
-
-             node.attr("cx", function(d) { return d.x; })
-                 .attr("cy", function(d) { return d.y; });
-           });
-           
-           svg.on("mousemove", function() {
-		     fisheye.focus(d3.mouse(this));
-
-		     node.each(function(d) { d.fisheye = fisheye(d); })
-			     .attr("cx", function(d) { return d.fisheye.x; })
-			     .attr("cy", function(d) { return d.fisheye.y; })
-			     .attr("r", function(d) { return d.fisheye.z * 4.5; });
-
-		     link.attr("x1", function(d) { return d.source.fisheye.x; })
-			     .attr("y1", function(d) { return d.source.fisheye.y; })
-			     .attr("x2", function(d) { return d.target.fisheye.x; })
-			     .attr("y2", function(d) { return d.target.fisheye.y; });
-		   });
-           
-           
-           //end of force-directed-graph
-
-	     
-       
-       d3.json("donut.json",function(error,root){
-	     
-	     var svg = d3.select("body")
-	                 .append("svg")
-	                 .attr("id","donut")
-	                 .append("g");
-	     
-	     svg.attr("id","piechart");
-
-         svg.append("g")
-	        .attr("class", "slices");
-         svg.append("g")
-	        .attr("class", "labels");
-         svg.append("g")
-	        .attr("class", "lines");
-
+  	   d3.json("data/repost_users.json", function(error, graph) {
          var width = 400,
-         height = 150,
-	     radius = Math.min(width, height) / 2;
+         height = 250;
 
-         var pie = d3.layout.pie()
-	                        .sort(null)
-	                        .value(function(d) {
-		   return d.value;
-	     });
+         var fisheye = d3.fisheye.circular()
+	   	                         .radius(50)
+	   	                         .distortion(1);
 
-         var arc = d3.svg.arc()
-	                     .outerRadius(radius * 0.8)
-	                     .innerRadius(radius * 0.4);
+         var color = d3.scale.category20();
 
-         var outerArc = d3.svg.arc()
-	                          .innerRadius(radius * 0.9)
-	                          .outerRadius(radius * 0.9);
+         var force = d3.layout.force()
+                              .charge(-120)
+                              .linkDistance(30)
+                              .size([width, height]);
 
-         svg.attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+         var svg = d3.select("body").append("svg")
+                     .attr("width", width)
+                     .attr("height", height);
 
-         var key = function(d){ return d.data.label; };
 
-         
+         force
+                     .nodes(graph.nodes)
+                     .links(graph.links)
+                     .start();
 
-         inspect = function change(num) {
-	       
-	       svg = d3.select("body").select("#piechart");
-		   
-	       svg.append("g");
+         var link = svg.selectAll(".link")
+                       .data(graph.links)
+                       .enter().append("line")
+                       .attr("class", "link")
+                       .style("stroke-width", function(d) { return Math.sqrt(d.value); });
 
+         var node = svg.selectAll(".node")
+                       .data(graph.nodes)
+                       .enter().append("circle")
+                       .attr("class", "node")
+                       .attr("r", 5)
+                       .style("fill", function(d) { return color(d.group); })
+                       .call(force.drag);
+
+         node.append("title")
+             .text(function(d) { return d.name; });
+
+         force.on("tick", function() {
+           link.attr("x1", function(d) { return d.source.x; })
+               .attr("y1", function(d) { return d.source.y; })
+               .attr("x2", function(d) { return d.target.x; })
+               .attr("y2", function(d) { return d.target.y; });
+
+           node.attr("cx", function(d) { return d.x; })
+               .attr("cy", function(d) { return d.y; });
+         });
+
+         svg.on("mousemove", function() {
+		   fisheye.focus(d3.mouse(this));
+
+		   node.each(function(d) { d.fisheye = fisheye(d); })
+			   .attr("cx", function(d) { return d.fisheye.x; })
+			   .attr("cy", function(d) { return d.fisheye.y; })
+			   .attr("r", function(d) { return d.fisheye.z * 4.5; });
+
+		   link.attr("x1", function(d) { return d.source.fisheye.x; })
+			   .attr("y1", function(d) { return d.source.fisheye.y; })
+			   .attr("x2", function(d) { return d.target.fisheye.x; })
+			   .attr("y2", function(d) { return d.target.fisheye.y; });
+		 });
+         //end of force-directed-graph
+
+         d3.json("data/donut.json",function(error,root){
+	       var svg = d3.select("body")
+	                   .append("svg")
+	                   .attr("id","donut")
+	                   .append("g");
+	       svg.attr("id","piechart");
            svg.append("g")
 	          .attr("class", "slices");
            svg.append("g")
@@ -451,121 +399,146 @@
 
            var key = function(d){ return d.data.label; };
 
-           var color = d3.scale.ordinal()
-	                           .domain(["Verified-Male", "Verified-Female", "Unverified-Male", "Unverified-Female"])
-	                           .range(["#98abc5","#6b486b", "#a05d56", "#ff8c00"]);
-	       ////////////////////
-	       
-	       var data = color.domain().map(function(label,i){
-		     return { label: label, value: root[num][i] }
-	       });
+           inspect = function change(num) {
+	         svg = d3.select("body").select("#piechart");
+	         svg.append("g");
 
-	       /* ------- PIE SLICES -------*/
-	       var slice = svg.select(".slices").selectAll("path.slice")
-		                  .data(pie(data), key);
+             svg.append("g")
+	            .attr("class", "slices");
+             svg.append("g")
+	            .attr("class", "labels");
+             svg.append("g")
+	            .attr("class", "lines");
 
-	       slice.enter()
-		        .insert("path")
-		        .style("fill", function(d) { return color(d.data.label); })
-		        .attr("class", "slice");
+             var width = 400,
+             height = 150,
+	         radius = Math.min(width, height) / 2;
 
-	       slice		
-		        .transition().duration(400)
-		        .attrTween("d", function(d) {
-			 this._current = this._current || d;
-			 var interpolate = d3.interpolate(this._current, d);
-			 this._current = interpolate(0);
-			 return function(t) {
-			   return arc(interpolate(t));
-			 };
-		   })
+             var pie = d3.layout.pie()
+	                            .sort(null)
+	                            .value(function(d) {
+		       return d.value;
+	         });
 
-	       slice.exit()
-		        .remove();
+             var arc = d3.svg.arc()
+	                         .outerRadius(radius * 0.8)
+	                         .innerRadius(radius * 0.4);
 
-	       /* ------- TEXT LABELS -------*/
+             var outerArc = d3.svg.arc()
+	                              .innerRadius(radius * 0.9)
+	                              .outerRadius(radius * 0.9);
 
-	       var text = svg.select(".labels").selectAll("text")
-		                 .data(pie(data), key);
+             svg.attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-	       text.enter()
-		       .append("text")
-		       .attr("dy", ".35em")
-		       .text(function(d) {
-			 return d.data.label;
-		   });
-	       
-	       function midAngle(d){
-		     return d.startAngle + (d.endAngle - d.startAngle)/2;
-	       }
+             var key = function(d){ return d.data.label; };
 
-	       text.transition().duration(400)
-		       .attrTween("transform", function(d) {
-			 this._current = this._current || d;
-			 var interpolate = d3.interpolate(this._current, d);
-			 this._current = interpolate(0);
-			 return function(t) {
-			   var d2 = interpolate(t);
-			   var pos = outerArc.centroid(d2);
-			   pos[0] = radius * (midAngle(d2) < Math.PI ? 1 : -1);
-			   return "translate("+ pos +")";
-			 };
-		   })
-		       .styleTween("text-anchor", function(d){
-			 this._current = this._current || d;
-			 var interpolate = d3.interpolate(this._current, d);
-			 this._current = interpolate(0);
-			 return function(t) {
-			   var d2 = interpolate(t);
-			   return midAngle(d2) < Math.PI ? "start":"end";
-			 };
-		   });
+             var color = d3.scale.ordinal()
+	                             .domain(["Verified-Male", "Verified-Female", "Unverified-Male", "Unverified-Female"])
+	                             .range(["#98abc5","#6b486b", "#a05d56", "#ff8c00"]);
+	         ////////////////////
 
-	       text.exit()
-		       .remove();
+	         var data = color.domain().map(function(label,i){
+		       return { label: label, value: root[num][i] }
+	         });
 
-	       /* ------- SLICE TO TEXT POLYLINES -------*/
+	         /* ------- PIE SLICES -------*/
+	         var slice = svg.select(".slices").selectAll("path.slice")
+		                    .data(pie(data), key);
 
-	       var polyline = svg.select(".lines").selectAll("polyline")
-		                     .data(pie(data), key);
-	       
-	       polyline.enter()
-		           .append("polyline");
+	         slice.enter()
+		          .insert("path")
+		          .style("fill", function(d) { return color(d.data.label); })
+		          .attr("class", "slice");
 
-	       polyline.transition().duration(400)
-		           .attrTween("points", function(d){
-			 this._current = this._current || d;
-			 var interpolate = d3.interpolate(this._current, d);
-			 this._current = interpolate(0);
-			 return function(t) {
-			   var d2 = interpolate(t);
-			   var pos = outerArc.centroid(d2);
-			   pos[0] = radius * 0.95 * (midAngle(d2) < Math.PI ? 1 : -1);
-			   return [arc.centroid(d2), outerArc.centroid(d2), pos];
-			 };			
-		   });
-	       
-	       polyline.exit()
-		           .remove();
-         };
-         inspect(199);
-	 	 //end of pie  
-	 	 
-	 	 
+	         slice		
+		          .transition().duration(400)
+		          .attrTween("d", function(d) {
+			   this._current = this._current || d;
+			   var interpolate = d3.interpolate(this._current, d);
+			   this._current = interpolate(0);
+			   return function(t) {
+			     return arc(interpolate(t));
+			   };
+		     })
+
+	         slice.exit()
+		          .remove();
+
+	         /* ------- TEXT LABELS -------*/
+
+	         var text = svg.select(".labels").selectAll("text")
+		                   .data(pie(data), key);
+
+	         text.enter()
+		         .append("text")
+		         .attr("dy", ".35em")
+		         .text(function(d) {
+			   return d.data.label;
+		     });
+
+	         function midAngle(d){
+		       return d.startAngle + (d.endAngle - d.startAngle)/2;
+	         }
+
+	         text.transition().duration(400)
+		         .attrTween("transform", function(d) {
+			   this._current = this._current || d;
+			   var interpolate = d3.interpolate(this._current, d);
+			   this._current = interpolate(0);
+			   return function(t) {
+			     var d2 = interpolate(t);
+			     var pos = outerArc.centroid(d2);
+			     pos[0] = radius * (midAngle(d2) < Math.PI ? 1 : -1);
+			     return "translate("+ pos +")";
+			   };
+		     })
+		         .styleTween("text-anchor", function(d){
+			   this._current = this._current || d;
+			   var interpolate = d3.interpolate(this._current, d);
+			   this._current = interpolate(0);
+			   return function(t) {
+			     var d2 = interpolate(t);
+			     return midAngle(d2) < Math.PI ? "start":"end";
+			   };
+		     });
+
+	         text.exit()
+		         .remove();
+
+	         /* ------- SLICE TO TEXT POLYLINES -------*/
+
+	         var polyline = svg.select(".lines").selectAll("polyline")
+		                       .data(pie(data), key);
+
+	         polyline.enter()
+		             .append("polyline");
+
+	         polyline.transition().duration(400)
+		             .attrTween("points", function(d){
+			   this._current = this._current || d;
+			   var interpolate = d3.interpolate(this._current, d);
+			   this._current = interpolate(0);
+			   return function(t) {
+			     var d2 = interpolate(t);
+			     var pos = outerArc.centroid(d2);
+			     pos[0] = radius * 0.95 * (midAngle(d2) < Math.PI ? 1 : -1);
+			     return [arc.centroid(d2), outerArc.centroid(d2), pos];
+			   };
+		     });
+
+	         polyline.exit()
+		             .remove();
+           };
+           inspect(199);
+	 	   //end of donut chart
+         });
        });
-       
-});
-
      });
-
-     
-     
-     
 
     </script>
   </head>
   <body>
-	  <p>Adward's Production</p>
+	<p>Adward's Production</p>
   </body>
 
 </html>

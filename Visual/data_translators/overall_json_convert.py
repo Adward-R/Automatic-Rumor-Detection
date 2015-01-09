@@ -7,7 +7,7 @@ import sys
 def main():
     path = r'/Users/Adward/Documents/ZJU/SRTP/LevelData/'
     cnt = 0
-    fileWriter = open("weibo.json",'w')
+    fileWriter = open("../data/weibo.json",'w')
     fileWriter.write('{\n "name": "weibo",\n "children": [')
     for parent, dirs, files in os.walk(path):
         for f in files:

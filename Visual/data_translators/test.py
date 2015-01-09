@@ -1,5 +1,5 @@
 def main():
-    fReader = open('test.json','r')
+    fReader = open('test.txt','r')
     lines = []
     for line in fReader:
         if int(line.split(' ')[1])>=15 :

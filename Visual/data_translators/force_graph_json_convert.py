@@ -60,7 +60,7 @@ def main():
     #        if link[i][j]>0 :
     #            link[i][j] = link_value[link_value_len-1-link_value.index(link[i][j])]
 
-    f = open("_users.json",'w')
+    f = open("../data/repost_users.json",'w')
     f.write('{\n "nodes": [')
     cnt = 0
     for man in province:
