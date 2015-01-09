@@ -114,6 +114,7 @@
                    .attr("width", width + margin.left + margin.right)
                    .attr("height", height + margin.top + margin.bottom)
                    .append("g")
+                   .attr("id","haha")
                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
        //.on("mouseover",function(){num=num+1; console.log(num);});
 
@@ -139,6 +140,7 @@
        svg.append("g")
           .attr("class", "x axis")
           .attr("transform", "translate(0," + height + ")")
+          .attr("id","baraxis")
           .call(xAxis);
 
        d3.selectAll("input").on("change", change);
@@ -215,22 +217,20 @@
 		                     .domain([0, yStackMax])
 		                     .range([height, 0]);
 		     
-		     d3.selectAll("g")
-               .data(0)
+		     
+		     //clear the old data in order to prepare to redraw the bar chart
+		     d3.select("svg").selectAll("g")
+               .data([])
                .exit()
                .remove();
 
-             svg = d3.select("svg")
-                     .attr("width", width + margin.left + margin.right)
-                     .attr("height", height + margin.top + margin.bottom)
-             //.append("g")
-                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");         
+             svg = d3.select("svg");         
              
              
-             var layer = svg.selectAll(".layer")
+             layer = svg.selectAll(".layer")
                             .data(layers)
                             .enter().append("g")
-                            .attr("class", "layer")
+//                            .attr("class", "layer")
                             .style("fill", function(d, i) { return color(i); });
 
              //d3.select(("input[value=\"stacked\"]").property("checked",true));
@@ -250,6 +250,7 @@
 		                       .orient("bottom");
 		     
 		     svg.append("g")
+		     	//.select("#baraxis")
                 .attr("class", "x axis")
                 .attr("transform", "translate(0," + height + ")")
                 .call(xAxis);
@@ -298,9 +299,7 @@
                    .attr("x", function(d) { return x(d.x); })
                    .attr("width", x.rangeBand());
              }
-
-		     inspect();
-    	     
+		     inspect(); 
 		   }
     	 });
   	   });    
@@ -353,8 +352,8 @@
 
          inspect = function change() {
 	       
-	       //var svg = d3.select("body").append("svg").append("g");
-	       svg = d3.select("body").select("#piechart");	
+	       svg = d3.select("body").select("#piechart");
+		   
 	       svg.append("g");
 
            svg.append("g")
