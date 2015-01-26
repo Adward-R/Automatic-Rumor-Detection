@@ -159,4 +159,16 @@
  4. ###数据可视化专题站：
  	`http://www.ourd3js.com/wordpress/?cat=2`
 
+#VI. 系统运行截图
 
+##整体效果
+
+![Shot1](shot1.png)
+
+##拖动控件滑块后左侧两图相应地同步改变
+
+![Shot2](shot2.png)
+
+##力学图的鱼眼效果（做了限制以免夸张的缩放影响拖拽和显示）
+
+![Shot3](shot3.png)
