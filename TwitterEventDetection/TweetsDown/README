@@ -1,0 +1,4 @@
+README 
+This project downloads tweets from Twitter Stream API, process them, and save them as csv files. 
+
+T.B.D. The project also suppose to process the tweets so as to be used in text analysis tasks.
