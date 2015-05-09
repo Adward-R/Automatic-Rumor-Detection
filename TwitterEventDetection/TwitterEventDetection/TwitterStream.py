@@ -1,8 +1,4 @@
-'''
-Created on 2015年2月10日
 
-@author: shengxia
-'''
 import os 
 import csv
 
@@ -26,7 +22,7 @@ class TwitterStream(object):
         Return tweets one by one from the files.
         '''
         no_former_tweet = True
-        former_tweet = ('NAN', 'NAN', 'NAN')
+        former_tweet = ('NAN', 'NAN', 'NAN', 'NAN')
         for fn in self.files:
             with open(fn, newline = '', encoding = 'utf-8') as f:
                 csv_reader = csv.reader(f)
@@ -52,7 +48,7 @@ class TwitterStream(object):
                                 yield former_tweet
                             else:
                                 no_former_tweet = False
-                        former_tweet = (row[idx_time], row[idx_id], row[idx_txt])
+                        former_tweet = (row[idx_time], row[idx_id], row[idx_txt],row[idx_rt])
                     except StopIteration:
                         break
                     except:

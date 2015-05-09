@@ -227,7 +227,7 @@ class TemporalProcessor(object):
                 ewma = stats[0]
                 ewmvar = stats[1]
                 ewma = max(ewma, self.beta)
-                ratio = (count / self.curr_tweets_count - ewma) / (math.sqrt(ewmvar) + self.beta)
+                ratio = (count / self.curr_tweets_count - ewma) / (math.sqrt(ewmvar) + self.beta) #THE FORMULA
                 if ratio > self.s:
                     f.write('%s %f\n' % (term, ratio))
             f.write('\n')

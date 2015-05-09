@@ -192,7 +192,10 @@ class TemporalProcessor(object):
             self.curr_writer = csv.writer(self.curr_file)
         #print('in temporal process:5')
         # save the processed tweet
-        self.curr_writer.writerow([id_str, rt_str, time_str, terms.__str__()])
+        if rt_str=='':
+            self.curr_writer.writerow([id_str, time_str, terms.__str__()])
+        else:
+            self.curr_writer.writerow([rt_str, time_str, terms.__str__()])
         # proceed the incoming tweet
         self.curr_tweets_count += 1
         for term in set(terms):
