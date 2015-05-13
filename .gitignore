@@ -1,8 +1,8 @@
 .DS_Store
 #*#
 ./json/*.json
-./TwitterEventDetection/InvertedIndex/token2tweet.db
-./TwitterEventDetection/InvertedIndex/token2tweet.db-journal
-./TwitterEventDetection/InvertedIndex/serialized/*
-./TwitterEventDetection/TestData/*
-
+TwitterEventDetection/InvertedIndex/token2tweet.db
+TwitterEventDetection/InvertedIndex/token2tweet.db-journal
+TwitterEventDetection/InvertedIndex/serialized/
+TwitterEventDetection/TestData/
+TwitterEventDetection/TestData/serialized/burst_terms
