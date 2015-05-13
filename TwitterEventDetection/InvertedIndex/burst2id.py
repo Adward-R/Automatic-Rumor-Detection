@@ -20,6 +20,7 @@ def get_burst_terms(burst_term_info):
             else:
                 burst_term_info[interval].append(li_ne[0])
 
+#TODO: any hotspot id must include at least two burst items
 def token2id(id_count, burst_term_info, dbname, start_hour, start_date, end_date):
     conn = sqlite3.connect(dbname)
     c = conn.cursor()
@@ -32,8 +33,13 @@ def token2id(id_count, burst_term_info, dbname, start_hour, start_date, end_date
                 for id in ids:
                     count = 0
                     for date in range(start_date, end_date+1):
-                        count += c.execute('SELECT COUNT(*) FROM "%s" WHERE id=?' %str(date), (id,))
-                    id_count.append([id, count, start_hour + inter - 1])
+                        count_result = c.execute('SELECT COUNT(*) FROM "%s" WHERE id=?' %str(date), id)
+                        for cnt in count_result:
+                            count += cnt[0] #cnt is a tuple with only one element
+                            break
+                    if count>=50: #TODO actually count cannot be used to determine any hotspot in an online algorithm
+                        id_count.append([id[0], count, start_hour + inter - 1])
+                        print('processed '+itm+' : '+str(id[0])+' : '+str(count)+' : '+str(start_hour))
     conn.close()
 
 if __name__=='__main__':
