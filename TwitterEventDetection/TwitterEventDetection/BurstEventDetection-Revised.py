@@ -237,12 +237,13 @@ class TemporalProcessor(object):
 
 if __name__ == '__main__':
     ts = TwitterStream()
-    datapath = '/Volumes/Adward_Backup/SRTP/Testdata/'
+    datapath = '/Users/Adward/Github/Automatic-Rumor-Detection/TwitterEventDetection/TestData/original'
     dirlist = os.listdir(datapath)
     for path in dirlist:
         if path.startswith('201') and os.path.isdir(os.path.join(datapath,path)):
             ts.source(os.path.join(datapath,path))
     ts.sort()
-    temp = TemporalProcessor(3600,0.3,0.0002,8,result_dir='/Volumes/Adward_Backup/SRTP/Testdata/serialized')
+    temp = TemporalProcessor(3600,0.3,0.0002,8,
+            result_dir='/Users/Adward/Github/Automatic-Rumor-Detection/TwitterEventDetection/TestData/serialized')
     ed = EventDetector(TextProcessor(),temp,ts.generator())
     ed.process_stream()
