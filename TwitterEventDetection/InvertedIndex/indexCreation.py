@@ -28,7 +28,7 @@ def db_insert(dbname):
     for fn in file_lst:
         files.append(os.path.join(path, fn))
     for fn in files:
-        table_name = str(fn).split('_')[1] #date
+        table_name = str(fn).seplit('_')[1] #date
         c.execute('CREATE TABLE if not exists "%s" (token text, id integer)' % table_name)
         conn.commit()
         with codecs.open(fn, encoding='utf-8', errors='ignore') as f:

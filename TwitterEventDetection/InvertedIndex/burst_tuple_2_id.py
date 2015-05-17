@@ -36,6 +36,9 @@ def get_burst_tuples(burst_term_info):
 
 
 def tuple2id(id_count, burst_term_info, dbname, start_hour, start_date, end_date):
+    rt_count = []
+    for i in range(1600):
+        rt_count.append(0)
     conn = sqlite3.connect(dbname)
     c = conn.cursor()
     for inter in range(burst_term_info.__len__()):
@@ -72,9 +75,19 @@ def tuple2id(id_count, burst_term_info, dbname, start_hour, start_date, end_date
                             count += cnt[0] #cnt is a tuple with only one element
                             break
                     if count>=0: #TODO actually count cannot be used to determine any hotspot in an online algorithm
-                        id_count.append([id, count, start_hour + inter])
-                        print('processed '+str(tup)+' : '+str(id)+' : '+str(count)+' : '+str(start_hour))
+                        #id_count.append([id, count, start_hour + inter])
+                        try:
+                            rt_count[count] += 1
+                        except:
+                            print(str(tup)+' : '+str(id)+' : '+str(count)+' : '+str(start_hour))
+                        with open('burst_id_from_tuple', 'a') as f:
+                            f.write(str(tup)+' : '+str(id)+' : '+str(count)+' : '+str(start_hour)+'\n')
+
     conn.close()
+    with open('burst_tuple_2_id_line_chart_data.tsv','a') as f:
+        f.write('xspan\tyspan\n')
+        for i in range(1600):
+            f.write(str(i)+'\t'+str(rt_count[i])+'\n')
 
 if __name__=='__main__':
     burst_term_info = [0,] #each item is a time interval, and each interval includes all burst_terms

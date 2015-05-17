@@ -38,7 +38,7 @@ def token2id(id_count, burst_term_info, dbname, start_hour, start_date, end_date
                         for cnt in count_result:
                             count += cnt[0] #cnt is a tuple with only one element
                             break
-                    if count>=50: #TODO actually count cannot be used to determine any hotspot in an online algorithm
+                    if count>=0: #TODO actually count cannot be used to determine any hotspot in an online algorithm
                         id_count.append([id[0], count, start_hour + inter])
                         print('processed '+itm+' : '+str(id[0])+' : '+str(count)+' : '+str(start_hour))
     conn.close()
